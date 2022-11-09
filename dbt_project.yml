@@ -1,0 +1,95 @@
+
+# Name your project! Project names should contain only lowercase characters
+# and underscores. A good package name should reflect your organization's
+# name or the intended use of these models
+name: 'rdd'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'default'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets:         # directories to be removed by `dbt clean`
+  - "target"
+  - "logs"
+
+snapshots:
+  +target_database: "{% if target.name == 'prd' %}rdd_prd{% else %}rdd{% endif %}"
+  +target_schema: "{% if target.name == 'prd' %}prd_99_snapshots{% else %}dev_99_snapshots{% endif %}"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+# In this example config, we tell dbt to build all models in the example/ directory
+# as tables. These settings can be overridden in the individual model files
+# using the `{{ config(...) }}` macro.
+models:
+  rdd:
+    sagai:
+      # Applies to all files under models/example/
+      staging:
+        +tags: "core"
+        +materialized: view
+        +schema: 01_stagging
+      cleaned:
+        +tags: "core"      
+        +materialized: table
+        +schema: 05_cleaned      
+      intermediate:
+        +tags: "core"      
+        +materialized: table
+        +schema: 06_intermediate      
+      export:
+        +tags: "core"      
+        +materialized: table
+        +schema: 07_export
+      analysed:
+        +tags: "postcore"      
+        +materialized: table
+        +schema: 08_analysed
+      rejet:
+        +tags: "postcore"          
+        +materialized: table
+        +schema: 98_rejected                        
+    mapping:
+      +tags: "core"      
+      +materialized: view
+      +schema: 02_mapping
+    externe:
+      +tags: "core"       
+      +materialized: view
+      +schema: 03_externe
+    middleware:
+      +tags: "mdw"       
+      +materialized: view
+      +schema: 99_mdw_export      
+    merlin:
+      +tags: "merlin"       
+      delta:
+        +materialized: view
+        +schema: 00_delta
+      full:
+        +materialized: view
+        +schema: 00_full
+    travail:
+      +tags: "work"
+      vues:
+        +materialized: view
+        +schema: 00_work
+      tables:
+        +materialized: table
+        +schema: 00_work
+      requetes:
+        +materialzed: view
+        +schema: 00_atelier
